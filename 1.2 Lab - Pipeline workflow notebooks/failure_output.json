@@ -1,0 +1,14 @@
+{
+    "status": "failed",
+    "error_message": "Column 'NonExistentColumn' not found in input dataset",
+    "troubleshooting_steps": [
+        "1. Verify that all column names used in the transformations exist in the input dataset.",
+        "2. Check for typos in column names (e.g., 'NonExistentColumn').",
+        "3. Use 'transformed_data.printSchema()' to inspect the dataset schema and ensure all expected columns are present.",
+        "4. Debug the data loading process to verify the input dataset contains the expected schema."
+    ],
+    "next_steps": [
+        "1. Fix the identified issues in the notebook or input data.",
+        "2. Re-run the pipeline after applying the fixes."
+    ]
+}
