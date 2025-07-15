@@ -1,0 +1,70 @@
+
+{
+  "name": "Lab Pipeline Validation Workflow with Conditional Execution - 2025-07-15",
+  "email_notifications": {
+    "on_failure": ["labuser10928721_1752600705@vocareum.com"],
+    "on_success": ["labuser10928721_1752600705@vocareum.com"]
+  },
+  "tasks": [
+    {
+      "task_key": "data_cleaning",
+      "notebook_task": {
+        "notebook_path": "<FILL_IN>",
+        "source": "WORKSPACE"
+      },
+      "existing_cluster_id": "0715-173235-t649xykl",
+      "timeout_seconds": 600,
+      "run_if": <FILL_IN>
+    },
+    {
+      "task_key": "feature_engineering",
+      "depends_on": [<FILL_IN>],
+      "notebook_task": {
+        "notebook_path": "<FILL_IN>",
+        "source": "WORKSPACE",
+        "base_parameters": {
+          <FILL_IN>
+        }
+      },
+      "existing_cluster_id": "0715-173235-t649xykl",
+      "timeout_seconds": 600,
+      "run_if": "ALL_SUCCESS"
+    },
+    {
+      "task_key": "conditional_execution",
+      "depends_on": [<FILL_IN>],
+      "condition_task": {
+        "op": "EQUAL_TO",
+        "left": "{{tasks.feature_engineering.values.feature_engineering_status}}",
+        "right": "SUCCESS"
+      },
+      "timeout_seconds": 0
+    },
+    {
+      "task_key": "failure_handling",
+      "depends_on": [{"task_key": "conditional_execution", "outcome": "false"}],
+      "spark_python_task": {
+        "python_file": "<FILL_IN>",
+        "parameters": [
+          "-e",
+          "NonExistentColumn: Column not found in the dataset"
+        ]
+      },
+      "existing_cluster_id": "0715-173235-t649xykl",
+      "timeout_seconds": 600
+    },
+    {
+      "task_key": "model_evaluation",
+      "depends_on": [{"task_key": "conditional_execution", "outcome": "true"}],
+      "notebook_task": {
+        "notebook_path": "<FILL_IN>",
+        "source": "WORKSPACE",
+        "base_parameters": {
+          <FILL_IN>
+        }
+      },
+      "existing_cluster_id": "0715-173235-t649xykl",
+      "timeout_seconds": 600
+    }
+  ]
+}
