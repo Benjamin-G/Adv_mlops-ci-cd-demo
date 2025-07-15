@@ -23,9 +23,9 @@
         "notebook_path": "/Users/labuser10928721_1752600705@vocareum.com/advanced-machine-learning-operations-1.2.6/M01 - Streamlining MLOps with Databricks/1.2 Lab - Pipeline workflow notebooks/02 - Feature Engineering and Model Training",
         "source": "WORKSPACE",
         "base_parameters": {
-          "max_depth" = "5",
-          "n_estimators" = "100",
-          "subsample" = "0.8"
+          "max_depth":"5",
+          "n_estimators":"100",
+          "subsample":"0.8"
         }
       },
       "existing_cluster_id": "0715-173235-t649xykl",
@@ -62,9 +62,9 @@
         "notebook_path": "/Users/labuser10928721_1752600705@vocareum.com/advanced-machine-learning-operations-1.2.6/M01 - Streamlining MLOps with Databricks/1.2 Lab - Pipeline workflow notebooks/04 - Model Evaluation and Testing with Accuracy Check",
         "source": "WORKSPACE",
         "base_parameters": {
-          "max_depth" = "5",
-          "n_estimators" = "100",
-          "subsample" = "0.8"
+          "max_depth":"5",
+          "n_estimators":"100",
+          "subsample":"0.8"
         }
       },
       "existing_cluster_id": "0715-173235-t649xykl",
