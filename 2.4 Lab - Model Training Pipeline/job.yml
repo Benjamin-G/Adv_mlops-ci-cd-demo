@@ -1,0 +1,73 @@
+resources:
+  jobs:
+    Model_Training_Pipeline:
+      name: Model Training Pipeline
+      tasks:
+        - task_key: silver_to_feature_store
+          notebook_task:
+            notebook_path: /Workspace/Users/labuser10928721_1752684289@vocareum.com/Adv_mlops-ci-cd-demo/2.4
+              Lab - Model Training Pipeline/01 - Silver to Feature Store
+            base_parameters:
+              catalog: dbacademy
+              column: Age
+              primary_key: id
+              schema: labuser10928721_1752684289
+              silver_table_name: diabetes
+              target_column: Diabetes_binary
+            source: WORKSPACE
+          description: 01 Silver to Feature Store
+        - task_key: data_validation
+          depends_on:
+            - task_key: silver_to_feature_store
+          notebook_task:
+            notebook_path: /Workspace/Users/labuser10928721_1752684289@vocareum.com/Adv_mlops-ci-cd-demo/2.4
+              Lab - Model Training Pipeline/02 - Data Validation Tests
+            base_parameters:
+              catalog: dbacademy
+              schema: labuser10928721_1752684289
+              silver_table_name: diabetes
+            source: WORKSPACE
+          description: 02 Data Validation Tests
+        - task_key: normalization_validation
+          depends_on:
+            - task_key: data_validation
+          notebook_task:
+            notebook_path: /Workspace/Users/labuser10928721_1752684289@vocareum.com/Adv_mlops-ci-cd-demo/2.4
+              Lab - Model Training Pipeline/03 - Normalization Validation
+            base_parameters:
+              catalog: dbacademy
+              schema: labuser10928721_1752684289
+              normalized_column: Age
+              silver_table_name: diabetes
+            source: WORKSPACE
+          description: 03 Normalization Validation
+        - task_key: train_models
+          depends_on:
+            - task_key: normalization_validation
+          notebook_task:
+            notebook_path: /Workspace/Users/labuser10928721_1752684289@vocareum.com/Adv_mlops-ci-cd-demo/2.4
+              Lab - Model Training Pipeline/04 - Train Models on Validated
+              Features
+            base_parameters:
+              catalog: dbacademy
+              delete_column: BMI
+              primary_key: id
+              schema: labuser10928721_1752684289
+              silver_table_name: diabetes
+              target_column: Diabetes_binary
+            source: WORKSPACE
+          description: 04 Train Models on Validated Features
+        - task_key: serve_model
+          depends_on:
+            - task_key: train_models
+          notebook_task:
+            notebook_path: /Workspace/Users/labuser10928721_1752684289@vocareum.com/Adv_mlops-ci-cd-demo/2.4
+              Lab - Model Training Pipeline/05 - Serve the Model
+            base_parameters:
+              catalog: dbacademy
+              schema: labuser10928721_1752684289
+            source: WORKSPACE
+          description: 05 Serve the Model
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
