@@ -23,10 +23,10 @@
 
 # COMMAND ----------
 
-catalog = dbutils.widgets.get(<FILL_IN>)
-schema = dbutils.widgets.get(<FILL_IN>)
-normalized_column = dbutils.widgets.get(<FILL_IN>)
-silver_table_name = dbutils.widgets.get(<FILL_IN>)
+catalog = dbutils.widgets.get("catalog")
+schema = dbutils.widgets.get("schema")
+normalized_column = dbutils.widgets.get("normalized_column")
+silver_table_name = dbutils.widgets.get("silver_table_name")
 
 # COMMAND ----------
 
@@ -45,26 +45,26 @@ import numpy as np
 # Test function to check normalization
 def test_column_normalized(df, column):
     if column not in df.columns:
-        raise <FILL_IN>(f"Column '{column}' does not exist in the DataFrame.")
+        raise AssertionError(f"Column '{column}' does not exist in the DataFrame.")
     
-    mean = <FILL_IN>
-    std = <FILL_IN>
+    mean = np.mean(df[column])
+    std = np.std(df[column])
     
     # Allowing a small tolerance for floating-point arithmetic
     tolerance = 1e-4
-    <FILL_IN> abs(mean) < tolerance, f"Mean of column '{column}' is not approximately 0. It is {mean}."
-    <FILL_IN> abs(std - 1) < tolerance, f"Standard deviation of column '{column}' is not approximately 1. It is {std}."
+    assert abs(mean) < tolerance, f"Mean of column '{column}' is not approximately 0. It is {mean}."
+    assert abs(std - 1) < tolerance, f"Standard deviation of column '{column}' is not approximately 1. It is {std}."
     print(f"Column '{column}' is properly normalized.")
 
 # COMMAND ----------
 
 # read table from feature store
-df2 = <FILL_IN>
+df2 = fe.read_table(name=f'{silver_table_name}_features').toPandas()
 
 # COMMAND ----------
 
 
-test_column_normalized(<FILL_IN>)
+test_column_normalized(df2, f'{normalized_column}_normalized')
 
 # COMMAND ----------
 

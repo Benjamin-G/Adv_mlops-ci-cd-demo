@@ -36,14 +36,14 @@
 
 # COMMAND ----------
 
-catalog = dbutils.widgets.get(<FILL_IN>)
-schema = dbutils.widgets.get(<FILL_IN>)
+catalog = dbutils.widgets.get("catalog")
+schema = dbutils.widgets.get("schema")
 spark.sql(f"USE {catalog}.{schema}")
 
 # COMMAND ----------
 
-silver_table_name = dbutils.widgets.get(<FILL_IN>)
-df = spark.read.format('delta').table(<FILL_IN>).toPandas()
+silver_table_name = dbutils.widgets.get("silver_table_name")
+df = spark.read.format('delta').table(silver_table_name).select('id', 'Diabetes_binary', 'HighBP', 'BMI', 'Smoker', 'Stroke', 'HeartDiseaseorAttack', 'Age'). toPandas()
 
 # COMMAND ----------
 
@@ -52,38 +52,30 @@ df = spark.read.format('delta').table(<FILL_IN>).toPandas()
 
 # COMMAND ----------
 
-import pandas as pd
-import numpy as np
-
 from databricks.feature_engineering import FeatureEngineeringClient
 
-## Instantiate the FeatureEngineeringClient
 fe = FeatureEngineeringClient()
 
-## Normalize the Age column and store it as Age_normalized
+column = dbutils.widgets.get("column")
+target_column = dbutils.widgets.get("target_column")
+primary_key = dbutils.widgets.get("primary_key")
 
-column = dbutils.widgets.get(<FILL_IN>)
-target_column = dbutils.widgets.get(<FILL_IN>)
+# Normalize the specified column and drop unnecessary columns
+df[f'{column}_normalized'] = (df[column] - df[column].mean()) / df[column].std()
+df = df.drop([target_column, column], axis=1)
 
-df[f'{column}_normalized'] = <FILL_IN>
-
-
-df = df.drop(target_column, axis=1)
-df = df.drop(column, axis=1)
 normalized_df = spark.createDataFrame(df)
 
-primary_key = dbutils.widgets.get(<FILL_IN>)
+feature_table_name = f'{catalog}.{schema}.{silver_table_name}_features'
 
-## Set the feature table name for storage in UC
-feature_table_name = f'{<FILL_IN>}.{<FILL_IN>}.{<FILL_IN>}_features'
+spark.sql(f"DROP TABLE IF EXISTS {feature_table_name}")
 
-## print(f"The name of the feature table: {feature_table_name}\n\n")
-
-spark.sql(f'drop table if exists {feature_table_name}')
-
-## Create the feature table
 fe.create_table(
-    <FILL_IN>
+    name=feature_table_name,
+    primary_keys=[primary_key],
+    df=normalized_df,
+    description=f"{schema} quality features",
+    tags={"source": "silver", "format": "delta"}
 )
 
 # COMMAND ----------

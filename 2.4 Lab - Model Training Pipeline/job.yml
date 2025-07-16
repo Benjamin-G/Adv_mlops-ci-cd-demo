@@ -15,6 +15,7 @@ resources:
               silver_table_name: diabetes
               target_column: Diabetes_binary
             source: WORKSPACE
+          existing_cluster_id: 0716-164541-nvdgmo1h
           description: 01 Silver to Feature Store
         - task_key: data_validation
           depends_on:
@@ -27,6 +28,7 @@ resources:
               schema: labuser10928721_1752684289
               silver_table_name: diabetes
             source: WORKSPACE
+          existing_cluster_id: 0716-164541-nvdgmo1h
           description: 02 Data Validation Tests
         - task_key: normalization_validation
           depends_on:
@@ -40,13 +42,14 @@ resources:
               normalized_column: Age
               silver_table_name: diabetes
             source: WORKSPACE
+          existing_cluster_id: 0716-164541-nvdgmo1h
           description: 03 Normalization Validation
         - task_key: train_models
           depends_on:
             - task_key: normalization_validation
           notebook_task:
             notebook_path: /Workspace/Users/labuser10928721_1752684289@vocareum.com/Adv_mlops-ci-cd-demo/2.4
-              Lab - Model Training Pipeline/04 - Train Models on Validated
+              Lab - Model Training Pipeline/04  - Train Models on Validated
               Features
             base_parameters:
               catalog: dbacademy
@@ -56,6 +59,7 @@ resources:
               silver_table_name: diabetes
               target_column: Diabetes_binary
             source: WORKSPACE
+          existing_cluster_id: 0716-164541-nvdgmo1h
           description: 04 Train Models on Validated Features
         - task_key: serve_model
           depends_on:
@@ -67,7 +71,7 @@ resources:
               catalog: dbacademy
               schema: labuser10928721_1752684289
             source: WORKSPACE
+          existing_cluster_id: 0716-164541-nvdgmo1h
           description: 05 Serve the Model
       queue:
         enabled: true
-      performance_target: PERFORMANCE_OPTIMIZED

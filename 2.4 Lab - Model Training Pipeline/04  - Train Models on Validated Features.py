@@ -22,11 +22,12 @@
 # COMMAND ----------
 
 
-catalog = dbutils.widgets.get(<FILL_IN>)
-schema = dbutils.widgets.get(<FILL_IN>)
-primary_key = dbutils.widgets.get(<FILL_IN>)
-target_column = dbutils.widgets.get(<FILL_IN>)
-silver_table_name = dbutils.widgets.get(<FILL_IN>)
+catalog = dbutils.widgets.get('catalog')
+schema = dbutils.widgets.get('schema')
+primary_key = dbutils.widgets.get('primary_key')
+target_column = dbutils.widgets.get('target_column')
+silver_table_name = dbutils.widgets.get('silver_table_name')
+delete_column = dbutils.widgets.get('delete_column')
 
 # COMMAND ----------
 
@@ -43,22 +44,22 @@ from sklearn.model_selection import train_test_split
 df = spark.read.format('delta').table(silver_table_name)
 training_df = df.toPandas()
 
-included_features_list = [<FILL_IN>]
-smaller_included_features_list = [<FILL_IN>]
+included_features_list = [c for c in df.columns if c not in [target_column, primary_key]]
+smaller_included_features_list = [c for c in included_features_list if c not in [delete_column]]
 
 # Split the data into train and test sets
 X_large = training_df[included_features_list]
 X_small = training_df[smaller_included_features_list]
 y = training_df[target_column]
-X_large_train, X_large_test, y_large_train, y_large_test = <FILL_IN>
-X_small_train = X_large_train.drop(<FILL_IN>)
-X_small_test = X_large_test.drop(<FILL_IN>)
+X_large_train, X_large_test, y_large_train, y_large_test = train_test_split(X_large, y, test_size=0.25, random_state=42)
+X_small_train = X_large_train.drop(columns=[delete_column])
+X_small_test = X_large_test.drop(columns=[delete_column])
 y_small_train = y_large_train
 y_small_test = y_large_test
 
 # Save the test set for querying later
 df = spark.createDataFrame(X_large_test)
-df.write.format('delta').mode('overwrite').table(<FILL_IN>)
+df.write.format('delta').mode('overwrite').saveAsTable('X_large_test')
 
 # COMMAND ----------
 
@@ -74,13 +75,16 @@ def train_model(X_train,y, alias):
         rf_classifier.fit(X_train, y_large_train)
 
         # Enable autologging
-        <FILL_IN>
+        mlflow.sklearn.autolog(log_input_examples=True, silent=True)
 
         # Define the registered model name
         registered_model_name = f"{catalog}.{schema}.my_model_{schema}"
 
         mlflow.sklearn.log_model(
-        <FILL_IN>
+            rf_classifier,
+            artifact_path = "model-artifacts", 
+            input_example=X_train[:3],
+            signature=infer_signature(X_train, y_large_train)
         )
 
         model_uri = f"runs:/{run.info.run_id}/model-artifacts"
@@ -91,16 +95,16 @@ def train_model(X_train,y, alias):
     model_name = f"{catalog}.{schema}.my_model_{schema}"
 
     # Register the model in the model registry
-    registered_model = <FILL_IN>
+    registered_model = mlflow.register_model(model_uri=model_uri, name=model_name)
 
     # Initialize an MLflow Client
     client = MlflowClient()
 
     # Assign an alias
     client.set_registered_model_alias(
-        name= <FILL_IN>,  # The registered model name
-        alias=<FILL_IN>,  # The alias representing the dev environment
-        version=<FILL_IN>  # The version of the model you want to move to "dev"
+        name=registered_model.name,  # The registered model name
+        alias=alias,  # The alias representing the dev environment
+        version=registered_model.version  # The version of the model you want to move to "dev"
     )
 
 train_model(X_large_train,y_large_train, 'a')

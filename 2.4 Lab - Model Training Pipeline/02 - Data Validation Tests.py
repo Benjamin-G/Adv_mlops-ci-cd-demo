@@ -15,9 +15,9 @@
 
 # COMMAND ----------
 
-catalog = dbutils.widgets.get(<FILL_IN>)
-schema = dbutils.widgets.get(<FILL_IN>)
-silver_table_name = dbutils.widgets.get('<FILL_IN>')
+catalog = dbutils.widgets.get('catalog')
+schema = dbutils.widgets.get('schema')
+silver_table_name = dbutils.widgets.get('silver_table_name')
 
 # COMMAND ----------
 
@@ -52,11 +52,18 @@ class TestDataValidation(unittest.TestCase):
         Test if the DataFrame schema matches the expected schema.
         """
         expected_schema = StructType([
-            <FILL_IN>
+            StructField("id", LongType(), True),
+            StructField("Diabetes_binary", IntegerType(), True),
+            StructField("HighBP", IntegerType(), True),
+            StructField("BMI", IntegerType(), True),
+            StructField("Smoker", IntegerType(), True),
+            StructField("Stroke", IntegerType(), True),
+            StructField("HeartDiseaseorAttack", IntegerType(), True),
+            StructField("Age", DoubleType(), True),
         ])
         actual_schema = self.df.schema
         self.assertEqual(
-            <FILL_IN>
+            actual_schema, expected_schema,
             f"Schema validation failed.\nExpected: {expected_schema}\nActual: {actual_schema}"
         )
 
@@ -70,7 +77,7 @@ class TestDataValidation(unittest.TestCase):
 
         missing_columns = {col: missing_values[col] for col in self.df.columns if missing_values[col] > 0}
         self.assertFalse(
-            <FILL_IN>
+            missing_columns,
             f"Missing values found in the following columns: {missing_columns}"
         )
 
@@ -84,14 +91,14 @@ class TestDataValidation(unittest.TestCase):
 
         negative_columns = {col: negative_values[col] for col in self.df.columns if negative_values[col] < 0}
         self.assertFalse(
-            <FILL_IN>
+            negative_columns,
             f"Negative values found in the following columns: {negative_columns}"
         )
 
 
 # Run the tests
-suite = unittest.<FILL_IN>
-unittest.<FILL_IN>
+suite = unittest.TestLoader().loadTestsFromTestCase(TestDataValidation)
+unittest.TextTestRunner().run(suite)
 
 # COMMAND ----------
 

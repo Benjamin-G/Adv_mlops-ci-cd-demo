@@ -13,19 +13,20 @@ schema = dbutils.widgets.get('schema')
 
 # COMMAND ----------
 
+
 from mlflow import MlflowClient
 
 # Initialize the MLflow Client
-client = <FILL_IN>
+client = MlflowClient()
 
 # Define the model name and alias
-model_name = <FILL_IN>  # Replace with your actual model name
+model_name = f"{catalog}.{schema}.my_model_{schema}"  # Replace with your actual model name
 alias_a = "a" 
 alias_b = "b"
 
 # Get the model version by alias
-model_a_version= <FILL_IN>
-model_b_version = <FILL_IN>
+model_a_version= client.get_model_version_by_alias(model_name, alias_a).version
+model_b_version = client.get_model_version_by_alias(model_name, alias_b).version
 
 # Print the model version
 print(f"Version for model a: {model_a_version}")
@@ -52,6 +53,7 @@ except:
 
 # COMMAND ----------
 
+
 from mlflow.deployments import get_deploy_client
 
 client = get_deploy_client("databricks")
@@ -73,15 +75,15 @@ except Exception as e:
                 "served_entities": [
                     {
                         "name": "my-model-a",
-                        "entity_name": <FILL_IN>,
-                        "entity_version": <FILL_IN>,
+                        "entity_name": model_name,
+                        "entity_version": model_a_version,
                         "workload_size": "Small",
                         "scale_to_zero_enabled": True
                     },
                     {
                         "name": "my-model-b",
-                        "entity_name": <FILL_IN>,
-                        "entity_version": <FILL_IN>,
+                        "entity_name": model_name,
+                        "entity_version": model_b_version,
                         "workload_size": "Small",
                         "scale_to_zero_enabled": True
                     }
@@ -89,11 +91,11 @@ except Exception as e:
                 "traffic_config": {
                     "routes": [
                         {
-                            "served_model_name": <FILL_IN>,
-                            "traffic_percentage": 30
+                            "served_model_name": "my-model-a",
+                            "traffic_percentage": 40
                         },
                         {
-                            "served_model_name": <FILL_IN>,
+                            "served_model_name": "my-model-b",
                             "traffic_percentage": 60
                         }
                     ]
